@@ -10,11 +10,10 @@ import UIKit
 class MainPageViewController: UIViewController {
 
     
-    let moodImageView = UIImageView()
     let stopButton = UIButton()
-    let repiteButton = UIButton()
     let infoButton = UIButton()
     var timer: Timer!
+    var isImageChangerActive = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -22,117 +21,69 @@ class MainPageViewController: UIViewController {
     }
     
     override func viewDidLayoutSubviews() {
-        if UIDevice.current.orientation.isLandscape {
-            NSLayoutConstraint.deactivate([
-                moodImageView.widthAnchor.constraint(equalToConstant: 300),
-                moodImageView.heightAnchor.constraint(equalToConstant: 300),
-                moodImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                moodImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -150),
-                stopButton.topAnchor.constraint(equalTo: moodImageView.bottomAnchor, constant: 20),
-                stopButton.leadingAnchor.constraint(equalTo: moodImageView.leadingAnchor),
-                stopButton.trailingAnchor.constraint(equalTo: moodImageView.trailingAnchor),
-                stopButton.heightAnchor.constraint(equalToConstant: 200),
-                repiteButton.topAnchor.constraint(equalTo: stopButton.bottomAnchor, constant: 10),
-                repiteButton.leadingAnchor.constraint(equalTo: moodImageView.leadingAnchor),
-                repiteButton.trailingAnchor.constraint(equalTo: moodImageView.trailingAnchor)
-            ])
-            NSLayoutConstraint.activate([
-                moodImageView.widthAnchor.constraint(equalToConstant: 100),
-                moodImageView.heightAnchor.constraint(equalToConstant: 100),
-                moodImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
-                moodImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: 0),
-                
-                stopButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 10),
-                stopButton.leadingAnchor.constraint(equalTo: moodImageView.trailingAnchor, constant: 10),
-                stopButton.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-
-                
-                repiteButton.topAnchor.constraint(equalTo: stopButton.bottomAnchor, constant: 10),
-                repiteButton.leadingAnchor.constraint(equalTo: moodImageView.leadingAnchor, constant: 10),
-                repiteButton.trailingAnchor.constraint(equalTo: moodImageView.trailingAnchor)
-            ])
+//        if UIDevice.current.orientation.isLandscape {
+//        }
         }
-        
-    }
 
     private func setupUI() {
-        setupMoodImageView()
-        setupStopButton()
-        setupRepiteButton()
-        autoImageChanger()
+        view.backgroundColor = .systemBackground
+        setupImageButton()
+        turnOnImageChanger()
+        setupInfoButton()
     }
     
-    private func autoImageChanger() {
+    private func turnOnImageChanger() {
         timer = .scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(showRandomCard), userInfo: nil, repeats: true)
     }
     
     @objc func showRandomCard() {
         let randomInt = Int.random(in: 1...1000)
         let image = UIImage(named: String(randomInt))
-        moodImageView.image = image
+        stopButton.configuration?.image = image
     }
     
-    @objc func stopRandomCardTimer() {
+    @objc func toggleImageChanger() {
         timer.invalidate()
+        if !isImageChangerActive { turnOnImageChanger() }
+        isImageChangerActive.toggle()
     }
     
-    @objc func restarTimer() {
-        timer.invalidate()
-        autoImageChanger()
-    }
-    
-    private func setupMoodImageView() {
-        view.addSubview(moodImageView)
-        let image = UIImage(named: "1")
-        moodImageView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            moodImageView.widthAnchor.constraint(equalToConstant: 300),
-            moodImageView.heightAnchor.constraint(equalToConstant: 300),
-            moodImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            moodImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -150)
-        ])
-        moodImageView.image = image
-    }
-    
-    private func setupStopButton() {
+    private func setupImageButton() {
         view.addSubview(stopButton)
-        stopButton.addTarget(self, action: #selector(stopRandomCardTimer), for: .touchUpInside)
+
+        stopButton.addTarget(self, action: #selector(toggleImageChanger), for: .touchUpInside)
         
+        stopButton.configuration = .borderedProminent()
+        stopButton.configuration?.cornerStyle = .capsule
         
-        stopButton.configuration = .tinted()
-        stopButton.setTitle("Stop", for: .normal)
-        stopButton.configuration?.cornerStyle = .large
         stopButton.configuration?.baseBackgroundColor = .systemRed
-        stopButton.configuration?.baseForegroundColor = .red
-        stopButton.configuration?.image = UIImage(systemName: "stop.fill")
 
         stopButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            stopButton.topAnchor.constraint(equalTo: moodImageView.bottomAnchor, constant: 20),
-            stopButton.leadingAnchor.constraint(equalTo: moodImageView.leadingAnchor),
-            stopButton.trailingAnchor.constraint(equalTo: moodImageView.trailingAnchor),
-            stopButton.heightAnchor.constraint(equalToConstant: 200)
+            stopButton.widthAnchor.constraint(equalToConstant: 300),
+            stopButton.heightAnchor.constraint(equalToConstant: 300),
+            stopButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stopButton.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
     
-    private func setupRepiteButton() {
-        view.addSubview(repiteButton)
-        repiteButton.addTarget(self, action: #selector(restarTimer), for: .touchUpInside)
-        repiteButton.configuration = .tinted()
-        repiteButton.setTitle("Play", for: .normal)
-        repiteButton.configuration?.cornerStyle = .medium
-        repiteButton.configuration?.baseBackgroundColor = .systemGray2
-        repiteButton.configuration?.baseForegroundColor = .green
-        repiteButton.configuration?.image = UIImage(systemName: "play.square.fill")
+    private func setupInfoButton() {
+        view.addSubview(infoButton)
 
-        repiteButton.translatesAutoresizingMaskIntoConstraints = false
+        infoButton.addTarget(self, action: #selector(toggleImageChanger), for: .touchUpInside)
+        
+        infoButton.configuration = .bordered()
+        infoButton.configuration?.cornerStyle = .capsule
+        infoButton.configuration?.baseForegroundColor = .systemGray2
+        infoButton.configuration?.image = UIImage(systemName: "info.circle")
+        
+        infoButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            repiteButton.topAnchor.constraint(equalTo: stopButton.bottomAnchor, constant: 10),
-            repiteButton.leadingAnchor.constraint(equalTo: moodImageView.leadingAnchor),
-            repiteButton.trailingAnchor.constraint(equalTo: moodImageView.trailingAnchor)
-            
+            infoButton.widthAnchor.constraint(equalToConstant: 50),
+            infoButton.heightAnchor.constraint(equalToConstant: 50),
+            infoButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -10),
+            infoButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10)
         ])
     }
-    
     
 }
